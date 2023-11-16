@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="root"></div>
+  <script>
+    // ... 나머지 매개변수 문법
+    function createElement(type, props, ...children) {
+      // props :  "" (href)
+      // children : 내용
+      return { type, props, children };
+    }
+    // component : 변하는 부분
+    function component(stateData) {
+      const menuItems = [];
+      for (let i = 0; i < stateData.length; i ++) {
+        const item = stateData[i];
+        // li 생성 후 a 생성 (href 속성을 가짐)
+        const menuItem = createElement('li', {}, createElement('a', { href:item.hash }, item.text));
+        // menuItems에 추가 
+        menuItems.push(menuItem);
+      }
+      // 메뉴 생성
+      const menu = createElement('ul', {}, ...menuItems);
+      const content = createElement('div', {}, 'Hello React');
+      // 요소 생성한 것 반환
+      return createElement('div', {}, menu, content);
+    }
+    // render : component 불러 오는 것
+    function render(virtualDom) {
+      // 만약 문자열이면
+      if(typeof virtualDom === 'string') {
+        // TextNode 반환
+        return document.createTextNode(virtualDom);
+      } 
+      const element = document.createElement(virtualDom.type);
+      if(virtualDom.props) {
+        for( const [key,value] of Object.entries(virtualDom.props)) {
+          element.setAttribute(key,value);
+        }
+      }
+      for(let i = 0; i < virtualDom.children.length; i ++) {
+        const child = virtualDom.children[i];
+        element.appendChild(render(child));
+      }
+      return element;
+    }
+
+    const stateData = [
+      {hash : '#home', text:'Home'},
+      {hash : '#about', text:'About'},
+      {hash : '#services', text:'Services'},
+      {hash : '#portfolio', text:'Portfolio'},
+      {hash : '#contract', text:'Contract'},
+      {hash : '#hi', text:'Hello'},
+
+    ];
+
+    // 가상 DOM 생성 
+    const virtualDom = component(stateData);
+    // 생성 된 것을 root 안에 넣음
+    const container = document.getElementById('root');
+    container.appendChild(render(virtualDom));
+  </script>
+</body>
+</html>
